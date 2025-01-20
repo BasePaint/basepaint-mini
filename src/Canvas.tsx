@@ -1,6 +1,6 @@
 import { memo } from "preact/compat";
 import { useEffect, useMemo, useReducer, useRef } from "preact/hooks";
-import Pixels from "./pixels";
+import Pixels, { flatPoint } from "./pixels";
 import {
   ArrowUpCircle,
   MagnifyingGlassMinus,
@@ -45,6 +45,16 @@ function Canvas({
   const background = useMemo(() => Pixels.fromString(pixels), [pixels]);
 
   async function save() {
+    const cleanPixels = new Pixels();
+
+    for (const { x, y, color } of state.pixels) {
+      const bgColor = background.storage.get(flatPoint({ x, y }));
+
+      if (color !== bgColor) {
+        cleanPixels.storage.set(flatPoint({ x, y }), color);
+      }
+    }
+
     const chainId = await client.getChainId();
     if (chainId !== client.chain.id) {
       await client.switchChain(client.chain);
@@ -105,7 +115,7 @@ function Canvas({
       ]),
       functionName: "paint",
       address: BASEPAINT_ADDRESS,
-      args: [BigInt(day), brushId, `0x${state.pixels}`],
+      args: [BigInt(day), brushId, `0x${cleanPixels.toString()}`],
     });
   }
 

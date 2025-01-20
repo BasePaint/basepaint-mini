@@ -1,7 +1,7 @@
 type FlatPoint = number;
 type Point2D = { x: number; y: number };
 
-function flatPoint({ x, y }: Point2D) {
+export function flatPoint({ x, y }: Point2D) {
   return x + y * 10_000;
 }
 
